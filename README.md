@@ -1,8 +1,6 @@
 <header>
 <h1>UltimateServer Plugins</h1>
 <p>A collection of community-created plugins to extend the functionality of UltimateServer.</p>
-<!-- TODO: Replace with a link to your banner image -->
-<img src="https://via.placeholder.com/900x250/1a1a2e/16213e?text=UltimateServer+Plugins" alt="UltimateServer Plugins Banner" class="banner">
 </header>
 
 <nav class="toc">
