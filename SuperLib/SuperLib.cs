@@ -22,9 +22,28 @@ public class SuperLib : IPlugin
     // Static fields to track CPU usage between requests
     private static DateTime _lastCpuCheck = DateTime.UtcNow;
     private static TimeSpan _lastCpuTime = Process.GetCurrentProcess().TotalProcessorTime;
+    private static Config config;
 
-    public Task OnLoadAsync(IPluginContext context)
+    public async Task OnLoadAsync(IPluginContext context)
     {
+        var pluginFolder = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "plugins", Name);
+        var pluginConfig = Path.Combine(pluginFolder, "config.json");
+
+        if (!Directory.Exists(pluginFolder))
+            Directory.CreateDirectory(pluginFolder);
+
+        if (!File.Exists(pluginConfig))
+        {
+            await File.WriteAllTextAsync(pluginConfig, JsonConvert.SerializeObject(new Config(), Formatting.Indented));
+            config = new Config();
+        }
+        else
+        {
+            var data = await File.ReadAllTextAsync(pluginConfig);
+            var json = JsonConvert.DeserializeObject<Config>(data);
+            config = json != null ? json : new Config();
+        }
+
         _context = context;
 
         // Get the authentication service from the server's dependency injection container
@@ -54,8 +73,6 @@ public class SuperLib : IPlugin
         context.RegisterApiRoute("/api/system/info", WithAuthentication(HandleSystemInfoAsync));
         context.RegisterApiRoute("/api/system/performance", WithAuthentication(HandlePerformanceAsync));
         context.RegisterApiRoute("/api/network/info", WithAuthentication(HandleNetworkInfoAsync));
-
-        return Task.CompletedTask;
     }
 
     /// <summary>
