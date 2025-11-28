@@ -1,6 +1,6 @@
 <div class="container">
 <h1 id="superlib-plugin">SuperLib Plugin</h1>
-<p>A powerful monitoring and system information plugin for the <strong>Ultimate C# Server</strong>. This plugin provides a set of useful API endpoints to check server health, view performance metrics, and inspect network details without requiring any external dependencies.</p>
+<p>A simple monitoring and system information plugin for the <strong>UltimateServer</strong>. This plugin provides a set of useful API endpoints to check server health, view performance metrics, and inspect network details without requiring any external dependencies.</p>
    
 <h2 id="table-of-contents">Table of Contents</h2>
 <ul>
@@ -44,9 +44,8 @@
 
 <h2 id="installation">Installation</h2>
 <ol>
-<li><strong>Build the Plugin</strong>: Compile the <code>SuperLib</code> project to generate <code>SuperLib.dll</code>.</li>
-<li><strong>Place the DLL</strong>: Copy <code>SuperLib.dll</code> into the <code>plugins</code> directory of your Ultimate C# Server installation.</li>
-<li><strong>Restart the Server</strong>: Restart the server. The plugin manager will automatically detect and load <code>SuperLib</code>.</li>
+<li><strong>Download</strong>: Download <code>SuperLib.dll</code> into one of your directories.</li>
+<li><strong>Upload</strong>: Go to the UltimateServer dashboard in the plugins tab, in upload section click on the <code>Browse Files</code> and choose the <code>SuperLib.dll</code> you downloaded. The plugin manager will automatically detect and load <code>SuperLib</code>.</li>
 </ol>
 <p>You should see a log message indicating that the plugin has loaded successfully and registered its API routes.</p>
 
@@ -66,18 +65,18 @@
 </ul>
 <p><strong>Example Header:</strong></p>
 <pre><code>Authorization: Bearer YOUR_JWT_TOKEN_HERE</code></pre>
-<p>The <code>/api/ping</code> endpoint is the only route that does <strong>not</strong> require authentication.</p>
+<p>The <code>/api/health</code> endpoint is the only route that does <strong>not</strong> require authentication.</p>
 
 <h2 id="api-endpoints">API Endpoints</h2>
 <p>All requests should be made to <code>http://your-server-address/...</code>.</p>
 
-<h3 id="get-apiping">GET /api/ping</h3>
+<h3 id="get-apihealth">GET /api/health</h3>
 <p>A simple health check endpoint used to verify that the server and the plugin are running correctly.</p>
 <ul>
 <li><strong>Authentication</strong>: <code>None</code></li>
 </ul>
 <p><strong>Example Request</strong>:</p>
-<pre><code>curl -X GET "http://your-server-address/api/ping"</code></pre>
+<pre><code>curl -X GET "http://your-server-address/api/health"</code></pre>
 <p><strong>Example Response</strong>:</p>
 <pre><code>{
   "status": "OK",
