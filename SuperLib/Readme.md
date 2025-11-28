@@ -38,7 +38,7 @@
 
 <h2 id="prerequisites">Prerequisites</h2>
 <ul>
-<li>A running instance of the <strong>Ultimate C# Server</strong>.</li>
+<li>A running instance of the <strong>UltimateServer</strong>.</li>
 <li>The server must have the plugin system enabled.</li>
 </ul>
 
