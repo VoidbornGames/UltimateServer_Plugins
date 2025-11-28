@@ -53,7 +53,7 @@
                         <!-- TODO: Add your plugins to this table. This is an example row. -->
                         <tr>
                             <td><a href="https://github.com/VoidbornGames/UltimateServer_Plugins/tree/main/SuperLib">SuperLib</a></td>
-                            <td>Provides essential api routes like /api/health, /api/system/info.</td>
+                            <td>Provides essential api routes like /api/health and /api/system/info.</td>
                             <td>VoidbornGames</td>
                             <td><span class="badge badge-active">Active</span></td>
                         </tr>
