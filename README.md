@@ -22,8 +22,17 @@
                 <p>Follow these steps to add a plugin to your UltimateServer instance.</p>
                 <ol>
                     <li>
-                        <h3>Download the Plugins</h3>
-                        <p>Download the <code>.dll</code> file in the plugin folder and upload it trough the UltimateServer dashboard.</p>
+                        <h3>Download The Plugins</h3>
+                        <p>Download the <code>.dll</code> plugin file from the collection.</p>
+                    </li>
+                    <li>
+                        <h3>Upload To The Server</h3>
+                        <p>Upload the plugin <code>.dll</code> file you downloaded trough the UltimateServer dashboard.</p>
+                    </li>
+                    <li>
+                        <h3>Configure The Plugin</h3>
+                        <p>Most of plugins have a config file like <code>config.json</code> in <code>/path/to/your/UltimateServer/Plugins/Plugin-Name/config.json</code> and 
+                        By editing it you can configure the plugin using that file.</p>
                     </li>
                 </ol>
             </section>
@@ -43,7 +52,7 @@
                     <tbody>
                         <!-- TODO: Add your plugins to this table. This is an example row. -->
                         <tr>
-                            <td><a href="#">SuperLib</a></td>
+                            <td><a href="https://github.com/VoidbornGames/UltimateServer_Plugins/tree/main/SuperLib">SuperLib</a></td>
                             <td>Provides essential api routes like /api/health, /api/system/info.</td>
                             <td>VoidbornGames</td>
                             <td><span class="badge badge-active">Active</span></td>
