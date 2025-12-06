@@ -1,6 +1,5 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
-using Server.Services;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -15,6 +14,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using UltimateServer.Plugins;
+using UltimateServer.Servers;
 using UltimateServer.Services;
 
 public class SuperLib : IPlugin
