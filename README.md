@@ -57,6 +57,13 @@
                             <td>VoidbornGames</td>
                             <td><span class="badge badge-active">Active</span></td>
                         </tr>
+                        <!-- TODO: Add your plugins to this table. This is an example row. -->
+                        <tr>
+                            <td><a href="https://github.com/VoidbornGames/UltimateServer_Plugins/tree/main/HyperGames">HyperGames</a></td>
+                            <td>A powerfull game hosting plugin.</td>
+                            <td>VoidbornGames</td>
+                            <td><span class="badge badge-active">Active</span></td>
+                        </tr>
                     </tbody>
                 </table>
             </section>
