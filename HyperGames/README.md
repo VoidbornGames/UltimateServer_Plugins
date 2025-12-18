@@ -4,8 +4,6 @@
             <p>A powerful plugin for UltimateServer that provides a web-based interface for creating, managing, and monitoring game servers. Features a modern dashboard, asynchronous server installation, and a template-based system for easy deployment.</p>
         </header>
 
-<h4>Note: You must use Nginx for your panel with a domain! See <strong><a href="https://github.com/VoidbornGames/UltimateServer/wiki/Configuration#ssltls-configuration">Docs</a></strong> for more information.</h4>
-
 <nav>
             <h2>Table of Contents</h2>
             <ul>
