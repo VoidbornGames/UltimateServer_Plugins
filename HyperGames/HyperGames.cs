@@ -1,4 +1,4 @@
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using System.Collections.Concurrent;
 using System.Diagnostics;
@@ -1059,7 +1059,7 @@ namespace HyperGames
 
             _jobTask = Task.Run(ProcessJobsAsync);
 
-            context.RegisterApiRoute("/HyperGames", ServeDefaultPageAsync);
+            context.RegisterApiRoute("/hypergames", ServeDefaultPageAsync);
             context.RegisterApiRoute("/api/HyperGames/login", HandleLoginAsync);
             context.RegisterApiRoute("/api/HyperGames/logout", WithAuth(HandleLogoutAsync));
             context.RegisterApiRoute("/api/HyperGames/servers", WithAuth(HandleServersAsync));
@@ -1118,13 +1118,7 @@ namespace HyperGames
         private async Task ServeDefaultPageAsync(HttpListenerRequest request)
         {
             var res = HttpContextHolder.CurrentResponse;
-            string htmlPath = Path.Combine(AppContext.BaseDirectory, "plugins", Name, "hyperpanel.html");
-
-            Directory.CreateDirectory(Path.GetDirectoryName(htmlPath));
-            if (!File.Exists(htmlPath))
-                await File.AppendAllTextAsync(htmlPath, frontend);
-
-            var html = await File.ReadAllTextAsync(htmlPath);
+            var html = frontend;
             var buf = Encoding.UTF8.GetBytes(html);
             res.ContentType = "text/html";
             res.ContentLength64 = buf.Length;
@@ -1356,39 +1350,128 @@ namespace HyperGames
 
         private async Task ProcessJobsAsync()
         {
-            while (!_cancel.IsCancellationRequested)
+            while (true)
             {
-                await _jobSignal.WaitAsync(_cancel.Token);
-                if (_jobQueue.TryDequeue(out var server))
+                try
                 {
-                    try
+                    // Wait for signal or cancellation
+                    await _jobSignal.WaitAsync(_cancel.Token);
+
+                    // Process all queued jobs
+                    while (_jobQueue.TryDequeue(out var server) && !_cancel.IsCancellationRequested)
                     {
-                        await server.Template.InstallServerFiles();
-                        server.Status = "stopped";
-                        await SaveServersAsync();
+                        try
+                        {
+                            await server.Template.InstallServerFiles();
+                            server.Status = "stopped";
+                            await SaveServersAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            _context.Logger.LogError($"Install error for server {server.Name}: {ex.Message}");
+                            server.Status = "error";
+                            await SaveServersAsync();
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        _context.Logger.LogError($"Install error: {ex.Message}");
-                        server.Status = "error";
-                    }
+                }
+                catch (OperationCanceledException)
+                {
+                    // Exit the loop when cancellation is requested
+                    _context.Logger.Log("Job processor received cancellation signal");
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    _context.Logger.LogError($"Unexpected error in job processor: {ex.Message}");
+                    // Wait a bit before continuing
+                    await Task.Delay(1000);
                 }
             }
         }
 
         public async Task OnUnloadAsync()
         {
-            foreach (var s in _servers)
+            try
             {
-                if (s.Template != null && s.Status == "running")
-                    await s.Template.StopServer();
+                // Set cancellation token first
+                _cancel.Cancel();
+
+                // Stop all running servers first (this should be quick)
+                var stopTasks = new List<Task>();
+                foreach (var s in _servers)
+                {
+                    if (s.Template != null && s.Status == "running")
+                    {
+                        try
+                        {
+                            stopTasks.Add(s.Template.StopServer());
+                        }
+                        catch (Exception ex)
+                        {
+                            _context.Logger.LogError($"Error stopping server {s.Name}: {ex.Message}");
+                        }
+                    }
+                }
+
+                // Don't wait too long for servers to stop
+                if (stopTasks.Count > 0)
+                {
+                    try
+                    {
+                        await Task.WhenAll(stopTasks).WaitAsync(TimeSpan.FromSeconds(10));
+                    }
+                    catch (TimeoutException)
+                    {
+                        _context.Logger.LogWarning("Some servers didn't stop within timeout");
+                    }
+                    catch (Exception ex)
+                    {
+                        _context.Logger.LogError($"Error waiting for servers to stop: {ex.Message}");
+                    }
+                }
+
+                // Wait for job processor to complete current job with timeout
+                if (_jobTask != null && !_jobTask.IsCompleted)
+                {
+                    try
+                    {
+                        // Use cancellation token to not wait indefinitely
+                        using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+                        await _jobTask.WaitAsync(cts.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        _context.Logger.LogWarning("Job processor didn't complete within timeout, continuing unload");
+                    }
+                    catch (Exception ex)
+                    {
+                        _context.Logger.LogError($"Error waiting for job processor: {ex.Message}");
+                    }
+                }
+
+                // Save server data
+                try
+                {
+                    var json = JsonConvert.SerializeObject(_servers, Formatting.Indented);
+                    Directory.CreateDirectory(Path.GetDirectoryName(serversFile));
+                    await File.WriteAllTextAsync(serversFile, json);
+                }
+                catch (Exception ex)
+                {
+                    _context.Logger.LogError($"Error saving server data: {ex.Message}");
+                }
             }
-
-            _cancel.Cancel();
-            if (_jobTask != null) await _jobTask;
-
-            var json = JsonConvert.SerializeObject(_servers, Formatting.Indented);
-            await File.WriteAllTextAsync(serversFile, json);
+            catch (Exception ex)
+            {
+                _context.Logger.LogError($"Error during OnUnloadAsync: {ex.Message}");
+                throw; // Re-throw to maintain error visibility
+            }
+            finally
+            {
+                // Ensure resources are cleaned up
+                _cancel?.Dispose();
+                _jobSignal?.Dispose();
+            }
         }
 
         public Task OnUpdateAsync(IPluginContext context)
@@ -1412,7 +1495,6 @@ namespace HyperGames
             Directory.CreateDirectory(Path.GetDirectoryName(serversFile));
             await File.WriteAllTextAsync(serversFile, json);
         }
-
     }
 
     public class GameServer
